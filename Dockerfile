@@ -14,4 +14,5 @@ COPY Publish/ /home/ubuntu/Release/
 COPY Config/*.sh  /home/ubuntu/Release/
 COPY Config/default  /etc/nginx/sites-available/
 RUN chmod +x /home/ubuntu/Release/start.sh 
+RUN chmod +x /home/ubuntu/Release/stop.sh 
 
