@@ -10,6 +10,6 @@ RUN apt-get install aspnetcore-runtime-2.2 nginx -y
 RUN mkdir /home/ubuntu/ &&\
     mkdir /home/ubuntu/Release &&\
     mkdir /home/ubuntu/Release/logs
-COPY published/ /home/ubuntu/Release/
-COPY Configfiles/*.sh  /home/ubuntu/Release/
-COPY Configfiles/default  /etc/nginx/sites-available/
+COPY Publish/ /home/ubuntu/Release/
+COPY Config/*.sh  /home/ubuntu/Release/
+COPY Config/default  /etc/nginx/sites-available/
