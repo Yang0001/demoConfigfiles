@@ -1,5 +1,5 @@
 #!/bin/sh
-APP_NAME=Unime.API.Admin.dll
+APP_NAME=S3TestWebApi.dll
 
 PROCESS=`ps -ef|grep $APP_NAME|grep -v grep  |awk '{ print $2}'`
 while :
