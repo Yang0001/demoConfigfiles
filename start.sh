@@ -1,5 +1,5 @@
 #!/bin/sh
-APP_NAME=Unime.API.Admin.dll
+APP_NAME=S3TestWebApi.dll
 echo "start begin..."
 echo $APP_NAME
 
