@@ -11,5 +11,5 @@ RUN mkdir /home/ubuntu/ &&\
     mkdir /home/ubuntu/Release &&\
     mkdir /home/ubuntu/Release/logs
 COPY published/ /home/ubuntu/Release/
-COPY files/ConfigFiles/*.sh  /home/ubuntu/Release/
-COPY files/ConfigFiles/default  /etc/nginx/sites-available/
+COPY Configfiles/*.sh  /home/ubuntu/Release/
+COPY Configfiles/default  /etc/nginx/sites-available/
