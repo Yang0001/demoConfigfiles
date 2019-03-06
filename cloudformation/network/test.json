@@ -1,0 +1,9 @@
+[
+    {
+        "ParameterKey": "Environment",
+        "ParameterValue": "Test"
+    }, {
+        "ParameterKey": "ApplicationCIDRBlock",
+        "ParameterValue": "10.0.20.0/24"
+    }
+]

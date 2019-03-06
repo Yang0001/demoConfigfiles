@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion : '2010-09-09'
+Description: Security infrastructure for APIDemo
+Parameters:
+  System:
+    Type: String
+    Description: "The name of the system to be used as a part of the prefix for all resource names"
+    Default: APIDemo
+  Region:
+    Type: String
+    Description: "The region in which the Downloads resources will be provisioned"
+    Default: "ap-southeast-2"
+  Environment:
+    Type: String
+    Default: "shared"
+  PrivilegedCIDR1:
+    Type: String
+    Default: "0.0.0.0/0"
+Conditions:
+  HasPrivilegedAccessCIDR1: !Not [!Equals [ !Ref PrivilegedCIDR1, ""]]
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    DeletionPolicy: Delete
+    Properties:
+      GroupDescription: >-
+        Specifies Privileged (SSH) Access to VPC.
+        This security group should be associated with any instance,
+        in order to provide centralized privileged access control based on source IPs.
+      GroupName: !Sub "${System}-${Environment}-ssh-access"
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${System}-${Environment}-VPC"
+      Tags:
+        - Key: System
+          Value: !Ref System
+        - Key: Name
+          Value: !Sub "${System}-${Environment}-ssh-access"
+  SSHAccessIngress1:
+    Type: AWS::EC2::SecurityGroupIngress
+    DeletionPolicy: Delete
+    Condition: HasPrivilegedAccessCIDR1
+    Properties:
+      GroupId: !Ref SecurityGroup
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      CidrIp: !Ref PrivilegedCIDR1
+Outputs:
+  SecurityGroup:
+    Value: !Ref SecurityGroup
+    Export:
+      Name: !Sub "${System}-${Environment}-ssh-securitygroup"

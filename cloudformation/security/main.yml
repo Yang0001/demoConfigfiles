@@ -1,0 +1,140 @@
+AWSTemplateFormatVersion : '2010-09-09'
+Description: Security Infrastructure for the APIDemo
+Parameters:
+  System:
+    Type: String
+    Description: "The name of the system to be used as a part of the prefix for all resource names"
+    Default: APIDemo
+  Environment:
+    Type: String
+    Description: "The name of the environment to be used as a part of the prefix for all resource names"
+  SharedEnvironment:
+    Type: String
+    Default: "shared"
+  Region:
+    Type: String
+    Description: "The region in which the Downloads resources will be provisioned"
+    Default: "ap-southeast-2"
+  VPCCIDRBlock:
+    Type: String
+  PrivilegedCIDR1:
+    Type: String
+    Default: ""
+Conditions:
+  HasPrivilegedAccessCIDR1: !Not [!Equals [ !Ref PrivilegedCIDR1, ""]]
+Resources:
+  ApplicationSubnetNACL:
+    Type: "AWS::EC2::SubnetNetworkAclAssociation"
+    Properties:
+      SubnetId:
+        Fn::ImportValue:
+          !Sub "${System}-${Environment}-SubnetAZ1"
+      NetworkAclId: !Ref ApplicationNACL
+  ApplicationNACL:
+    Type: AWS::EC2::NetworkAcl
+    DeletionPolicy: Delete
+    Properties:
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${System}-${SharedEnvironment}-VPC"
+      Tags:
+        - Key: System
+          Value: !Ref System
+        - Key: Name
+          Value: !Sub "${System}-${Environment}-APIDemo"
+  ApplicationInAccess:
+    Type: AWS::EC2::NetworkAclEntry
+    DeletionPolicy: Delete
+    Properties:
+      CidrBlock: "0.0.0.0/0"
+      Protocol: -1
+      RuleAction: allow
+      RuleNumber: 1000
+      NetworkAclId: !Ref ApplicationNACL
+  ApplicationOutAccess:
+    Type: AWS::EC2::NetworkAclEntry
+    DeletionPolicy: Delete
+    Properties:
+      CidrBlock: "0.0.0.0/0"
+      Egress: true
+      Protocol: -1
+      RuleAction: allow
+      RuleNumber: 1000
+      NetworkAclId: !Ref ApplicationNACL
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    DeletionPolicy: Delete
+    Properties:
+      GroupDescription: "APIDemo Application Security Group"
+      GroupName: !Sub "${System}-${Environment}-APIDemo"
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${System}-${SharedEnvironment}-VPC"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "0.0.0.0/0"
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "0.0.0.0/0"
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp:
+            Fn::ImportValue:
+              !Sub "${System}-${Environment}-CIDRBlock"
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: !Ref VPCCIDRBlock
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: "0.0.0.0/0"
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "0.0.0.0/0"
+        - IpProtocol: udp
+          FromPort: 123
+          ToPort: 123
+          CidrIp: "0.0.0.0/0"
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp:
+            Fn::ImportValue:
+              !Sub "${System}-${Environment}-CIDRBlock"
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: !Ref VPCCIDRBlock
+      Tags:
+        - Key: System
+          Value: !Ref System
+        - Key: Name
+          Value: !Sub "${System}-${Environment}-APIDemo"
+  LoggingPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    DeletionPolicy: Delete
+    Properties:
+      Path: !Sub "/${System}/${Environment}/APIDemo/"
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: "PublishLogInformation"
+            Effect: Allow
+            Action:
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+              - "logs:DescribeLogStreams"
+            Resource:
+              - !Sub "arn:aws:logs:${Region}:${AWS::AccountId}:log-group:${System}-${Environment}:log-stream:*"
+Outputs:
+  SecurityGroup:
+    Value: !Ref SecurityGroup
+    Export:
+      Name: !Sub "${System}-${Environment}-APIDemo-SecurityGroup"

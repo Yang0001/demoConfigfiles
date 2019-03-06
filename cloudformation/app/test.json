@@ -1,0 +1,15 @@
+[
+    {
+        "ParameterKey": "Environment",
+        "ParameterValue": "Test"
+    }, {
+        "ParameterKey": "SecurityContext",
+        "ParameterValue": "Test"
+    },{
+        "ParameterKey": "InstanceAMI",
+        "ParameterValue": "ami-0c36d475fb28ac765"
+    },{
+        "ParameterKey": "InstanceType",
+        "ParameterValue": "t2.micro"
+    }
+]

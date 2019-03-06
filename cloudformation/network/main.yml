@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion : '2010-09-09'
+Description: APIDemo
+Parameters:
+  System:
+    Type: String
+    Default: "APIDemo"
+  Region:
+    Type: String
+    Default: "us-west-2"
+  Environment:
+    Type: String
+    Default: "dev"
+  SharedEnvironment:
+    Type: String
+    Default: "shared"
+  ApplicationCIDRBlock:
+    Type: String
+Resources:
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub "${System}-${Environment}-APIDemo"
+      RetentionInDays: 14
+  SubnetAZ1:
+    Type: AWS::EC2::Subnet
+    DeletionPolicy: Delete
+    Properties:
+      CidrBlock: !Ref ApplicationCIDRBlock
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${System}-${SharedEnvironment}-VPC"
+      AvailabilityZone:
+        Fn::ImportValue:
+          !Sub "${System}-${SharedEnvironment}-AZ1"
+      Tags:
+        - Key: System
+          Value: !Ref System
+        - Key: Name
+          Value: !Sub "${System}-${Environment}-APIDemo"
+  SubnetAZ1RouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DeletionPolicy: Delete
+    Properties:
+      RouteTableId:
+        Fn::ImportValue:
+          !Sub "${System}-${SharedEnvironment}-PublicRouteTable"
+      SubnetId: !Ref SubnetAZ1
+Outputs:
+  SubnetAZ1:
+    Value: !Ref SubnetAZ1
+    Export:
+      Name: !Sub "${System}-${Environment}-SubnetAZ1"
+  CIDRBlock:
+    Value: !Ref ApplicationCIDRBlock
+    Export:
+      Name: !Sub "${System}-${Environment}-CIDRBlock"
+  AZ1:
+    Value: !GetAtt SubnetAZ1.AvailabilityZone
+    Export:
+      Name: !Sub "${System}-${Environment}-AZ1"
+
+##Accidently detleted default subnets then create a new DEFAULT VPC

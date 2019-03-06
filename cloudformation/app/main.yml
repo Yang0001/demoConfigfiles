@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion : '2010-09-09'
+Description: APIDemo OS infrastructure for the demo
+Parameters:
+  System:
+    Type: String
+    Default: "APIDemo"
+  Region:
+    Type: String
+    Default: "ap-southeast-2"
+  Environment:
+    Type: String
+  SharedEnvironment:
+    Type: String
+    Default: "shared"
+  SecurityContext:
+    Type: String
+  InstanceAMI:
+    Type: AWS::EC2::Image::Id
+    Default: "ami-0bbe6b35405ecebdb"
+  InstanceType:
+    Type: String
+    Default: "t2.micro"
+  KeyPair:
+    Type: String
+    Default: "Yang"
+  WaitTimeout:
+    Type: Number
+    Default: 1200
+    Description: >-
+      The length of time that wait conditions inside this template wait for a completion signal
+Resources:
+  Instance:
+    Type: AWS::EC2::Instance
+    DeletionPolicy: Delete
+    Properties:
+      DisableApiTermination: false
+      SourceDestCheck: false
+      ImageId: !Ref InstanceAMI
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPair
+      Monitoring: true
+      Tags:
+        - Key: System
+          Value: !Ref System
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ServerType
+          Value: "API"
+        - Key: Name
+          Value: !Sub "${System}-${Environment}-APIDemo"
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeleteOnTermination: true
+          Description: Primary network interface
+          DeviceIndex: 0
+          SubnetId:
+            Fn::ImportValue:
+              !Sub "${System}-${SecurityContext}-SubnetAZ1"
+          GroupSet:
+            - Fn::ImportValue:
+                !Sub "${System}-${SharedEnvironment}-ssh-securitygroup"
+            - Fn::ImportValue:
+                !Sub "${System}-${SecurityContext}-APIDemo-SecurityGroup"
+
+Outputs:
+  PublicIp:
+    Value: !GetAtt Instance.PublicIp
+    Export:
+      Name: !Sub "${System}-${Environment}-APIDemo-PublicIp"

@@ -1,0 +1,48 @@
+aws cloudformation create-stack --stack-name demo --template-body file://main.yml
+
+aws cloudformation create-stack --stack-name demo-shared-network --template-body file://main.yml
+aws cloudformation create-stack --stack-name demo-shared-security --template-body file://main.yml
+
+
+
+aws cloudformation create-stack --stack-name demo-dev-network --template-body file://main.yml --parameters file://dev.json
+aws cloudformation wait stack-create-complete --stack-name demo-dev-network
+
+aws cloudformation create-stack --stack-name demo-test-network --template-body file://main.yml --parameters file://test.json \&& aws cloudformation wait stack-create-complete --stack-name demo-test-network
+
+aws cloudformation create-stack --stack-name demo-prod-network --template-body file://main.yml --parameters file://prod.json \
+&& aws cloudformation wait stack-create-complete --stack-name demo-prod-network
+
+aws cloudformation create-stack --stack-name demo-dev-security --template-body file://main.yml --parameters file://dev.json --capabilities CAPABILITY_NAMED_IAM \
+&& aws cloudformation wait stack-create-complete --stack-name demo-dev-security
+
+aws cloudformation create-stack --stack-name demo-test-security --template-body file://main.yml --parameters file://test.json --capabilities CAPABILITY_NAMED_IAM
+
+--create OS
+aws cloudformation create-stack --stack-name demo-dev-os --template-body file://main.yml --parameters file://dev.json
+aws cloudformation create-stack --stack-name demo-test-os --template-body file://main.yml --parameters file://test.json
+
+aws cloudformation update-stack --stack-name demo-dev-security --template-body file://main.yml --parameters file://dev.json --capabilities CAPABILITY_NAMED_IAM
+
+
+--parameters file://dev.yml
+stack-create-complete
+
+aws cloudformation create-stack --stack-name example --template-body file://templates/single-instance.yml --parameters file://parameters/single-instance.json
+aws cloudformation update-stack --stack-name example --template-body file://templates/instance-and-route53.yml --parameters file://parameters/instance-and-route53.json
+
+
+
+--jenkins
+https://www.howtoforge.com/tutorial/ubuntu-jenkins-master-slave/
+
+--jenkins--salve
+usermod -a -G sudo jenkins
+modify in sudoers file
+chmod 777 /home
+
+debian系的没有sysconfig都在/etc/init.d/里面
+
+--修改jenkins权限
+/etc/default/jenkins
+https://www.jianshu.com/p/181dfb259dc7
