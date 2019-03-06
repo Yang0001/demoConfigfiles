@@ -1,0 +1,37 @@
+{
+  "variables": {
+    "aws_access_key": "AKIAIBEYGC36NR2F4PXQ",
+    "aws_secret_key": "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"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "ap-southeast-2",
+    "source_ami_filter": {
+      "filters": {
+        "virtualization-type": "hvm",        
+        "name": "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-20180912",
+        "root-device-type": "ebs"
+      },
+      "owners": ["099720109477"],
+      "most_recent": true
+    },
+    "instance_type": "t2.micro",
+    "ssh_username": "ubuntu",
+    "ami_name": "packer-ubuntu {{timestamp}}"
+  }],
+  "provisioners": [
+  {   
+    "type": "shell",
+    "script": "./install_docker.sh"
+  },     
+    { "type": "shell",          
+      "script": "./install_java8.sh"
+    },       
+    { "type": "shell",            
+      "script": "./install_jenkins.sh"            
+    }
+]
+  
+}
